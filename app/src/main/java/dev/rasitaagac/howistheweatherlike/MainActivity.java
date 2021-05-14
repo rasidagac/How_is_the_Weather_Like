@@ -24,6 +24,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.List;
 
+import dev.rasitaagac.howistheweatherlike.Adapter.ViewPagerAdapter;
 import dev.rasitaagac.howistheweatherlike.Common.Common;
 
 public class MainActivity extends AppCompatActivity {
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                             buildLocationRequest();
                             buildLocationCallBack();
 
-                            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                                 return;
                             }
                             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
@@ -93,7 +94,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewPager(ViewPager viewPager) {
-
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter.addFragment(TodayWeatherFragment.getInstance(), "Today");
+        viewPager.setAdapter(adapter);
     }
 
     private void buildLocationRequest() {

@@ -9,6 +9,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -22,21 +23,27 @@ import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
+import java.util.Objects;
 
 import dev.rasitaagac.howistheweatherlike.Adapter.ViewPagerAdapter;
 import dev.rasitaagac.howistheweatherlike.Common.Common;
 
 public class MainActivity extends AppCompatActivity {
 
-    private androidx.appcompat.widget.Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
     private CoordinatorLayout coordinatorLayout;
-    private FusedLocationProviderClient fusedLocationProviderClient;
+    private final FusedLocationProviderClient fusedLocationProviderClient;
     private LocationCallback locationCallback;
     private LocationRequest locationRequest;
+
+    public MainActivity(FusedLocationProviderClient fusedLocationProviderClient) {
+        this.fusedLocationProviderClient = fusedLocationProviderClient;
+    }
 
 
     @Override
@@ -44,12 +51,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.root_view);
+        coordinatorLayout = findViewById(R.id.root_view);
 
-        toolbar = (androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar);
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //Request permisson
         Dexter.withContext(this)
@@ -80,14 +87,18 @@ public class MainActivity extends AppCompatActivity {
     private void buildLocationCallBack() {
         locationCallback = new LocationCallback() {
             @Override
-            public void onLocationResult(LocationResult locationResult) {
+            public void onLocationResult(@NotNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                Common.current_locaiton = locationResult.getLastLocation();
+                Common.current_location = locationResult.getLastLocation();
 
-                viewPager = (ViewPager)findViewById(R.id.view_pager);
+                viewPager = findViewById(R.id.view_pager);
                 setupViewPager(viewPager);
-                tabLayout = (TabLayout)findViewById(R.id.tabs);
+                tabLayout = findViewById(R.id.tabs);
                 tabLayout.setupWithViewPager(viewPager);
+
+                //Log
+                Log.d("Location", locationResult.getLastLocation().getLatitude() +
+                        "/" + locationResult.getLastLocation().getLongitude());
 
             }
         };
@@ -100,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void buildLocationRequest() {
-        locationRequest = new LocationRequest();
+        LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(5000);
         locationRequest.setFastestInterval(3000);
